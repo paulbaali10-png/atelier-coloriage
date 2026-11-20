@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>L'Atelier à colorier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#fbf6ec; --paper2:#f3ead8; --ink:#1f1b16; --ink2:#5b5248;
+  --orange:#ff7a2f; --orange-d:#e0601a; --teal:#1e9e8f; --teal-d:#157a6e;
+  --yellow:#ffd23f; --line:#e4d8c2; --red:#d6453d;
+  --r:22px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:Nunito,system-ui,sans-serif;font-size:18px}
+body{
+  background-image:radial-gradient(var(--line) 1.2px, transparent 1.2px);
+  background-size:26px 26px;min-height:100vh;
+}
+button{font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+h1,h2,h3{font-family:Fredoka,Nunito,sans-serif;margin:0}
+.wrap{max-width:980px;margin:0 auto;padding:18px 20px 60px}
+
+/* header */
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo svg{width:46px;height:46px}
+.logo h1{font-size:30px;letter-spacing:.3px}
+.logo h1 span{color:var(--orange)}
+.spacer{flex:1}
+.counter{display:flex;align-items:center;gap:10px;background:#fff;border:2.5px solid var(--ink);border-radius:999px;padding:8px 16px;font-weight:800;box-shadow:3px 3px 0 var(--ink)}
+.dots{display:flex;gap:6px}
+.dot{width:18px;height:18px;border-radius:50%;border:2.5px solid var(--ink);background:var(--yellow)}
+.dot.off{background:#fff}
+
+nav{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.tab{border:2.5px solid var(--ink);background:#fff;border-radius:16px;padding:12px 22px;font-weight:800;font-size:18px;min-height:54px;box-shadow:3px 3px 0 var(--ink);color:var(--ink)}
+.tab[aria-selected="true"]{background:var(--ink);color:#fff}
+.tab.lock{margin-left:auto}
+
+.card{background:#fff;border:2.5px solid var(--ink);border-radius:var(--r);padding:24px;box-shadow:5px 5px 0 var(--ink)}
+.hidden{display:none!important}
+
+/* create */
+.prompt-label{font-family:Fredoka;font-size:26px;margin-bottom:14px;display:block}
+.inrow{display:flex;gap:10px;align-items:stretch}
+textarea,input[type=text]{flex:1;min-width:0;font:inherit;font-size:20px;border:2.5px solid var(--ink);border-radius:16px;padding:14px 16px;background:var(--paper);color:var(--ink);resize:none;min-height:60px}
+textarea{min-height:96px}
+textarea:focus,input:focus{outline:3px solid var(--yellow);outline-offset:2px}
+.mic{width:64px;min-width:64px;border:2.5px solid var(--ink);border-radius:16px;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:3px 3px 0 var(--ink)}
+.mic svg{width:28px;height:28px}
+.mic.on{background:var(--red);animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.06)}}
+.hint{color:var(--ink2);font-size:15px;margin-top:8px}
+
+.chips-title{font-weight:800;margin:20px 0 10px;color:var(--ink2);font-size:15px;text-transform:uppercase;letter-spacing:.8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:2px solid var(--ink);background:var(--paper2);border-radius:999px;padding:10px 16px;font-weight:700;font-size:17px;min-height:46px;color:var(--ink)}
+.chip:active{background:var(--yellow)}
+.chip.dice{background:var(--yellow)}
+
+.big{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:2.5px solid var(--ink);border-radius:18px;padding:16px 28px;font-weight:800;font-size:21px;min-height:64px;box-shadow:4px 4px 0 var(--ink);color:#fff;background:var(--orange)}
+.big:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink)}
+.big:disabled{background:#cfc6b8;color:#fff;cursor:not-allowed}
+.big.teal{background:var(--teal)}
+.big.white{background:#fff;color:var(--ink)}
+.big.small{font-size:17px;min-height:54px;padding:12px 18px}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+
+/* result */
+.result{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:22px;align-items:start}
+@media (max-width:760px){.result{grid-template-columns:1fr}}
+.sheet{background:#fff;border:2.5px solid var(--ink);border-radius:12px;aspect-ratio:210/297;width:100%;overflow:hidden;box-shadow:5px 5px 0 var(--ink);position:relative}
+.sheet svg{width:100%;height:100%;display:block}
+.idea-title{font-family:Fredoka;font-size:24px;margin-bottom:6px}
+.badge{display:inline-block;background:var(--paper2);border:2px solid var(--ink);border-radius:999px;padding:4px 12px;font-weight:800;font-size:15px}
+.side h3{font-size:20px;margin:18px 0 10px}
+
+/* loading */
+.loading{position:absolute;inset:0;background:rgba(251,246,236,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:20px;text-align:center}
+.pencil{width:90px;height:90px;animation:draw 1.3s ease-in-out infinite}
+@keyframes draw{0%,100%{transform:translate(-14px,6px) rotate(-8deg)}50%{transform:translate(14px,-6px) rotate(8deg)}}
+.bar{width:70%;height:16px;border:2.5px solid var(--ink);border-radius:999px;overflow:hidden;background:#fff}
+.bar i{display:block;height:100%;width:0;background:var(--orange);transition:width .3s}
+.loading b{font-family:Fredoka;font-size:22px}
+
+/* gallery */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:18px}
+.thumb{border:2.5px solid var(--ink);border-radius:12px;background:#fff;padding:0;overflow:hidden;box-shadow:3px 3px 0 var(--ink);text-align:left;color:var(--ink)}
+.thumb .im{aspect-ratio:210/297;border-bottom:2px solid var(--ink)}
+.thumb .im svg{width:100%;height:100%;display:block}
+.thumb .cap{padding:8px 10px;font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.empty{text-align:center;color:var(--ink2);padding:40px 10px;font-weight:700}
+
+/* messages */
+.msg{border:2.5px solid var(--ink);border-radius:16px;padding:14px 18px;font-weight:700;margin-top:16px;background:var(--yellow)}
+.msg.err{background:#ffd9d4}
+.stop{text-align:center;padding:30px 10px}
+.stop .big-emoji{font-size:64px}
+.stop h2{font-size:28px;margin:10px 0}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(31,27,22,.55);display:flex;align-items:center;justify-content:center;padding:18px;z-index:20}
+.modal .card{width:100%;max-width:420px;text-align:center}
+.pin-dots{display:flex;gap:14px;justify-content:center;margin:18px 0}
+.pin-dots i{width:22px;height:22px;border-radius:50%;border:2.5px solid var(--ink);background:#fff}
+.pin-dots i.f{background:var(--ink)}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pad button{border:2.5px solid var(--ink);border-radius:16px;background:var(--paper);font-family:Fredoka;font-size:28px;min-height:64px;color:var(--ink)}
+.pad button:active{background:var(--yellow)}
+
+/* parent */
+.prow{display:flex;align-items:center;gap:14px;padding:16px 0;border-bottom:2px dashed var(--line);flex-wrap:wrap}
+.prow:last-child{border-bottom:0}
+.prow .lbl{flex:1;min-width:200px;font-weight:800}
+.prow .lbl small{display:block;font-weight:600;color:var(--ink2)}
+.step{display:flex;align-items:center;gap:10px}
+.step button{width:54px;height:54px;border:2.5px solid var(--ink);border-radius:14px;background:#fff;font-size:26px;font-weight:800;color:var(--ink)}
+.step output{font-family:Fredoka;font-size:28px;min-width:36px;text-align:center}
+.big.red{background:var(--red)}
+
+.print-only{display:none}
+@page{size:A4 portrait;margin:0}
+@media print{
+  body{background:#fff}
+  .wrap,.modal{display:none!important}
+  .print-only{display:block!important;width:210mm;height:297mm}
+  .print-only svg{width:210mm;height:297mm;display:block}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <svg viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="4" width="40" height="40" rx="10" fill="#ffd23f" stroke="#1f1b16" stroke-width="3"/><path d="M14 33 L30 17 L35 22 L19 38 L13 39 Z" fill="#fff" stroke="#1f1b16" stroke-width="3" stroke-linejoin="round"/><path d="M27 20 L32 25" stroke="#1f1b16" stroke-width="3"/></svg>
+      <h1>L'Atelier <span>à colorier</span></h1>
+    </div>
+    <div class="spacer"></div>
+    <div class="counter hidden" id="counter"><span id="counterTxt">Dessins du jour</span><div class="dots" id="dots"></div></div>
+  </header>
+
+  <nav id="nav" class="hidden" role="tablist">
+    <button class="tab" role="tab" data-view="create" aria-selected="true">✏️ Créer</button>
+    <button class="tab" role="tab" data-view="gallery" aria-selected="false">🖼️ Ma galerie</button>
+    <button class="tab lock" role="tab" data-view="parent" aria-selected="false">🔒 Parent</button>
+  </nav>
+
+  <!-- boot -->
+  <section id="v-boot" class="card stop">
+    <div class="big-emoji">✏️</div>
+    <h2 id="bootTitle">Je prépare l'atelier…</h2>
+    <p id="bootTxt" class="hint"></p>
+  </section>
+
+  <!-- setup -->
+  <section id="v-setup" class="card hidden" style="text-align:center">
+    <h2 style="font-size:28px">Bienvenue !</h2>
+    <p>Avant de commencer, un parent doit choisir un <b>code secret à 4 chiffres</b>.<br>Il sert à régler la limite de dessins.</p>
+    <button class="big" id="setupBtn">Choisir le code parent</button>
+  </section>
+
+  <!-- create -->
+  <section id="v-create" class="hidden">
+    <div class="card" id="createCard">
+      <label class="prompt-label" for="idea">Qu'est-ce que tu veux colorier ?</label>
+      <div class="inrow">
+        <textarea id="idea" maxlength="300" placeholder="Ex : un dragon qui fait du skate sur la Lune"></textarea>
+        <button class="mic hidden" data-target="idea" aria-label="Dicter mon idée"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+      </div>
+      <p class="hint" id="micHint">Astuce : tu peux aussi utiliser le micro du clavier pour dicter.</p>
+
+      <div class="chips-title">Besoin d'une idée ?</div>
+      <div class="chips" id="chips"></div>
+
+      <div class="actions">
+        <button class="big" id="drawBtn">🖍️ Dessiner !</button>
+      </div>
+      <div id="createMsg"></div>
+    </div>
+    <div class="card stop hidden" id="limitCard">
+      <div class="big-emoji">🌙</div>
+      <h2>C'est fini pour aujourd'hui !</h2>
+      <p>Tu as utilisé tes dessins du jour. Reviens demain, ou réimprime un dessin de ta galerie.</p>
+      <div class="actions" style="justify-content:center"><button class="big teal" data-goto="gallery">Voir ma galerie</button></div>
+    </div>
+  </section>
+
+  <!-- result -->
+  <section id="v-result" class="hidden">
+    <div class="result">
+      <div class="sheet" id="sheet">
+        <div class="loading hidden" id="loading">
+          <svg class="pencil" viewBox="0 0 64 64"><path d="M10 50 L42 18 L50 26 L18 58 L8 60 Z" fill="#ffd23f" stroke="#1f1b16" stroke-width="3" stroke-linejoin="round"/><path d="M42 18 L48 12 L56 20 L50 26 Z" fill="#ff7a2f" stroke="#1f1b16" stroke-width="3" stroke-linejoin="round"/><path d="M10 50 L18 58" stroke="#1f1b16" stroke-width="3"/></svg>
+          <b id="loadTxt">Je dessine…</b>
+          <div class="bar"><i id="barFill"></i></div>
+          <span class="hint">Ça prend environ une minute.</span>
+        </div>
+      </div>
+      <div class="card side">
+        <div class="idea-title" id="resTitle"></div>
+        <span class="badge" id="editsLeft"></span>
+
+        <h3>Changer quelque chose ?</h3>
+        <div class="inrow">
+          <input type="text" id="edit" maxlength="200" placeholder="Ex : ajoute un soleil">
+          <button class="mic hidden" data-target="edit" aria-label="Dicter ma retouche"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+        </div>
+        <div class="actions" style="margin-top:12px"><button class="big teal small" id="editBtn">✨ Retoucher</button></div>
+
+        <h3>Imprimer</h3>
+        <div class="actions" style="margin-top:0">
+          <button class="big" id="pdfBtn">🖨️ Imprimer</button>
+          <button class="big white small" id="pngBtn">Enregistrer l'image</button>
+        </div>
+        <p class="hint">Choisis l'imprimante, format A4, sans marge si possible.</p>
+
+        <div class="actions">
+          <button class="big white small" id="newBtn">➕ Nouveau dessin</button>
+          <button class="big red small hidden" id="delBtn">Supprimer</button>
+        </div>
+        <div id="resMsg"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- gallery -->
+  <section id="v-gallery" class="hidden">
+    <div class="card">
+      <h2 style="font-size:26px;margin-bottom:6px">Ma galerie</h2>
+      <p class="hint" style="margin-top:0">Réimprimer un dessin ne compte pas dans ta limite.</p>
+      <div class="grid" id="grid"></div>
+    </div>
+  </section>
+
+  <!-- parent -->
+  <section id="v-parent" class="hidden">
+    <div class="card">
+      <h2 style="font-size:26px">Réglages parent</h2>
+      <div class="prow">
+        <div class="lbl">Dessins par jour<small>Les retouches (3 max par dessin) ne comptent pas.</small></div>
+        <div class="step"><button id="limMinus" aria-label="Moins">−</button><output id="limVal">2</output><button id="limPlus" aria-label="Plus">+</button></div>
+      </div>
+      <div class="prow">
+        <div class="lbl">Aujourd'hui<small id="todayInfo"></small></div>
+        <button class="big teal small" id="bonusBtn">+1 dessin aujourd'hui</button>
+      </div>
+      <div class="prow">
+        <div class="lbl">Code parent<small>4 chiffres.</small></div>
+        <button class="big white small" id="pinChange">Changer le code</button>
+      </div>
+      <div class="prow">
+        <div class="lbl">Supprimer des dessins<small>Ouvre un dessin dans la galerie : le bouton Supprimer apparaît tant que le mode parent est ouvert.</small></div>
+      </div>
+      <div class="actions"><button class="big" id="lockBtn">🔒 Verrouiller</button></div>
+      <div id="parentMsg"></div>
+    </div>
+  </section>
+</div>
+
+<!-- PIN modal -->
+<div class="modal hidden" id="pinModal" role="dialog" aria-modal="true">
+  <div class="card">
+    <h2 id="pinTitle" style="font-size:24px">Code parent</h2>
+    <div class="pin-dots" id="pinDots"><i></i><i></i><i></i><i></i></div>
+    <p class="hint" id="pinErr" style="min-height:22px;color:var(--red);font-weight:800"></p>
+    <div class="pad" id="pad"></div>
+    <div class="actions" style="justify-content:center"><button class="big white small" id="pinCancel">Annuler</button></div>
+  </div>
+</div>
+
+<div class="print-only" id="printSheet"></div>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
