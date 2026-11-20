@@ -106,6 +106,10 @@ async function askClaude(userText: string): Promise<string> {
     body: JSON.stringify({
       model: MODEL,
       max_tokens: 9000,
+      // Sonnet 5.5 réfléchit par défaut avant de répondre : on coupe cette réflexion,
+      // sinon elle consomme le budget et le temps du dessin.
+      thinking: { type: "between_tools" },
+      output_config: { effort: "medium" },
       system: SYSTEM,
       messages: [{ role: "user", content: userText }],
     }),
