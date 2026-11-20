@@ -136,7 +136,7 @@ $("#drawBtn").addEventListener("click", async ()=>{
   current={ id:null, idea, svg:null, edits:0 };
   show("v-result"); renderResult(); setLoading(true,"Je dessine…");
   try{
-    const r=await api("generate",{ idea },150000);
+    const r=await api("generate",{ idea },170000);
     current=r.drawing; st=r.status;
     setLoading(false); renderCounter(); renderResult(); $("#idea").value="";
   }catch(e){
@@ -152,7 +152,7 @@ $("#editBtn").addEventListener("click", async ()=>{
   if(instruction.length<2){ msg($("#resMsg"),"Écris ce que tu veux changer.",true); return; }
   busy=true; setLoading(true,"Je retouche…");
   try{
-    const r=await api("edit",{ id:current.id, instruction },150000);
+    const r=await api("edit",{ id:current.id, instruction },170000);
     current=r.drawing; $("#edit").value="";
     setLoading(false); renderResult();
   }catch(e){ setLoading(false); renderResult(); msg($("#resMsg"), e.message, true); }
