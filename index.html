@@ -75,7 +75,7 @@ textarea:focus,input:focus{outline:3px solid var(--yellow);outline-offset:2px}
 .result{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:22px;align-items:start}
 @media (max-width:760px){.result{grid-template-columns:1fr}}
 .sheet{background:#fff;border:2.5px solid var(--ink);border-radius:12px;aspect-ratio:210/297;width:100%;overflow:hidden;box-shadow:5px 5px 0 var(--ink);position:relative}
-.sheet svg{width:100%;height:100%;display:block}
+.sheet svg,.sheet .drawing-img{width:100%;height:100%;display:block;object-fit:contain;background:#fff}
 .idea-title{font-family:Fredoka;font-size:24px;margin-bottom:6px}
 .badge{display:inline-block;background:var(--paper2);border:2px solid var(--ink);border-radius:999px;padding:4px 12px;font-weight:800;font-size:15px}
 .side h3{font-size:20px;margin:18px 0 10px}
@@ -92,7 +92,7 @@ textarea:focus,input:focus{outline:3px solid var(--yellow);outline-offset:2px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:18px}
 .thumb{border:2.5px solid var(--ink);border-radius:12px;background:#fff;padding:0;overflow:hidden;box-shadow:3px 3px 0 var(--ink);text-align:left;color:var(--ink)}
 .thumb .im{aspect-ratio:210/297;border-bottom:2px solid var(--ink)}
-.thumb .im svg{width:100%;height:100%;display:block}
+.thumb .im svg,.thumb .im img{width:100%;height:100%;display:block;object-fit:contain;background:#fff}
 .thumb .cap{padding:8px 10px;font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .empty{text-align:center;color:var(--ink2);padding:40px 10px;font-weight:700}
 
@@ -129,7 +129,7 @@ textarea:focus,input:focus{outline:3px solid var(--yellow);outline-offset:2px}
   body{background:#fff}
   .wrap,.modal{display:none!important}
   .print-only{display:block!important;width:210mm;height:297mm}
-  .print-only svg{width:210mm;height:297mm;display:block}
+  .print-only svg,.print-only img{width:210mm;height:297mm;display:block;object-fit:contain}
 }
 </style>
 </head>
@@ -206,7 +206,7 @@ textarea:focus,input:focus{outline:3px solid var(--yellow);outline-offset:2px}
           <svg class="pencil" viewBox="0 0 64 64"><path d="M10 50 L42 18 L50 26 L18 58 L8 60 Z" fill="#ffd23f" stroke="#1f1b16" stroke-width="3" stroke-linejoin="round"/><path d="M42 18 L48 12 L56 20 L50 26 Z" fill="#ff7a2f" stroke="#1f1b16" stroke-width="3" stroke-linejoin="round"/><path d="M10 50 L18 58" stroke="#1f1b16" stroke-width="3"/></svg>
           <b id="loadTxt">Je dessine…</b>
           <div class="bar"><i id="barFill"></i></div>
-          <span class="hint">Ça prend environ une minute, ne ferme pas la page.</span>
+          <span class="hint">Ça prend environ 30 secondes, ne ferme pas la page.</span>
         </div>
       </div>
       <div class="card side">
@@ -282,7 +282,7 @@ textarea:focus,input:focus{outline:3px solid var(--yellow);outline-offset:2px}
 </div>
 
 <div class="print-only" id="printSheet"></div>
-<script src="config.js?v=5"></script>
-<script src="app.js?v=5"></script>
+<script src="config.js?v=6"></script>
+<script src="app.js?v=6"></script>
 </body>
 </html>

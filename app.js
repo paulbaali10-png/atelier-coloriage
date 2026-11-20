@@ -119,6 +119,13 @@ function cleanSvg(text){
 }
 function svgNode(t){ return document.importNode(new DOMParser().parseFromString(t,"image/svg+xml").documentElement,true); }
 
+/* Un dessin est soit une image (générateur), soit un SVG (ancien mode). */
+function drawingNode(d){
+  if(d && d.image_url){ const i=new Image(); i.src=d.image_url; i.alt=d.idea||"Coloriage"; i.className="drawing-img"; return i; }
+  const clean=d && d.svg ? cleanSvg(d.svg) : null;
+  return clean ? svgNode(clean) : null;
+}
+
 /* ---------- loading ---------- */
 let barTimer=null;
 function setLoading(on,label){
@@ -135,15 +142,15 @@ function setLoading(on,label){
 function renderResult(){
   const sheet=$("#sheet");
   [...sheet.children].forEach(c=>{ if(c.id!=="loading") c.remove(); });
-  const clean=current?.svg ? cleanSvg(current.svg) : null;
-  if(clean) sheet.insertBefore(svgNode(clean), $("#loading"));
+  const node=current ? drawingNode(current) : null;
+  if(node) sheet.insertBefore(node, $("#loading"));
   $("#resTitle").textContent = current ? current.idea : "";
   const left=st.editMax-(current?.edits||0);
   $("#editsLeft").textContent = left>0 ? `${left} retouche${left>1?"s":""} possible${left>1?"s":""}` : "Plus de retouche pour ce dessin";
   $("#edit").disabled = left<=0; $("#editBtn").disabled = left<=0;
   $("#delBtn").classList.toggle("hidden", !parentPin);
   // feuille d'impression
-  const ps=$("#printSheet"); ps.innerHTML=""; if(clean) ps.appendChild(svgNode(clean));
+  const ps=$("#printSheet"); ps.innerHTML=""; const pn=current ? drawingNode(current) : null; if(pn) ps.appendChild(pn);
   msg($("#resMsg"),"");
 }
 
@@ -189,8 +196,15 @@ $("#delBtn").addEventListener("click", async ()=>{
 });
 
 /* ---------- print / save ---------- */
-$("#pdfBtn").addEventListener("click",()=>{ if(current?.svg) window.print(); });
+$("#pdfBtn").addEventListener("click",()=>{ if(current?.svg||current?.image_url) window.print(); });
 $("#pngBtn").addEventListener("click", async ()=>{
+  if(current?.image_url){
+    try{
+      const blob=await fetch(current.image_url).then(r=>r.blob());
+      await shareOrDownload(blob, `coloriage-${slug(current.idea)}.png`);
+    }catch(e){ if(e&&e.name==="AbortError") return; msg($("#resMsg"),"Impossible d'enregistrer l'image.",true); }
+    return;
+  }
   const clean=current?.svg && cleanSvg(current.svg); if(!clean) return;
   try{
     const w=1654,h=2339;
@@ -200,13 +214,16 @@ $("#pngBtn").addEventListener("click", async ()=>{
     const c=document.createElement("canvas"); c.width=w; c.height=h;
     const x=c.getContext("2d"); x.fillStyle="#fff"; x.fillRect(0,0,w,h); x.drawImage(img,0,0,w,h);
     const blob=await new Promise(r=>c.toBlob(r,"image/png"));
-    const name=`coloriage-${slug(current.idea)}.png`;
-    const file=new File([blob],name,{type:"image/png"});
-    if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({ files:[file] }); return; }
-    const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click();
-    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },2000);
+    await shareOrDownload(blob, `coloriage-${slug(current.idea)}.png`);
   }catch(e){ if(e&&e.name==="AbortError") return; msg($("#resMsg"),"Impossible d'enregistrer l'image.",true); }
 });
+
+async function shareOrDownload(blob,name){
+  const file=new File([blob],name,{type:"image/png"});
+  if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({ files:[file] }); return; }
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },2000);
+}
 
 /* ---------- gallery ---------- */
 async function loadGallery(){
@@ -218,7 +235,7 @@ async function loadGallery(){
     drawings.forEach(d=>{
       const b=document.createElement("button"); b.className="thumb";
       const im=document.createElement("div"); im.className="im";
-      const clean=cleanSvg(d.svg); if(clean) im.appendChild(svgNode(clean));
+      const n=drawingNode(d); if(n){ if(n.tagName==="IMG") n.loading="lazy"; im.appendChild(n); }
       const cap=document.createElement("div"); cap.className="cap"; cap.textContent=d.idea;
       b.append(im,cap);
       b.onclick=()=>{ current={...d}; show("v-result"); renderResult(); };

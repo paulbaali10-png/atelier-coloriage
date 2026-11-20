@@ -6,4 +6,4 @@ Page web (GitHub Pages) qui transforme une idée en page de coloriage A4.
 - `supabase/functions/atelier` : la fonction serveur (limite par jour, retouches, code parent, appel à Claude).
 - `supabase/migrations` : le schéma de la base.
 
-Secret à définir dans Supabase → Edge Functions → Secrets : `ANTHROPIC_API_KEY`.
+Secrets à définir dans Supabase → Edge Functions → Secrets : `ANTHROPIC_API_KEY` et `OPENAI_API_KEY` (générateur d'images ; sans elle, retour au dessin vectoriel).
