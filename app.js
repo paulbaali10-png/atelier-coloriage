@@ -23,6 +23,20 @@ async function api(action, payload={}, timeoutMs=20000){
   return data;
 }
 
+/* Le serveur dessine en arrière-plan : on vérifie toutes les 3 s. */
+async function waitJob(jobId){
+  const t0=Date.now(); let netErrors=0;
+  while(Date.now()-t0 < 300000){
+    await new Promise(r=>setTimeout(r,3000));
+    let j;
+    try{ j=await api("job",{ id:jobId }); netErrors=0; }
+    catch(e){ if(++netErrors>=5) throw e; continue; }
+    if(j.status==="done") return j;
+    if(j.status==="error"){ if(j.counter){ st=j.counter; renderCounter(); } throw new Error(j.error||"Le dessin n'a pas pu être fait."); }
+  }
+  throw new Error("Le dessin prend trop de temps. Regarde dans ta galerie dans quelques minutes.");
+}
+
 /* ---------- helpers ---------- */
 function show(id){ $$("section").forEach(s=>s.classList.toggle("hidden", s.id!==id)); }
 function msg(el, text, err){ el.innerHTML=""; if(!text) return; const d=document.createElement("div"); d.className="msg"+(err?" err":""); d.textContent=text; el.appendChild(d); }
@@ -136,8 +150,10 @@ $("#drawBtn").addEventListener("click", async ()=>{
   current={ id:null, idea, svg:null, edits:0 };
   show("v-result"); renderResult(); setLoading(true,"Je dessine…");
   try{
-    const r=await api("generate",{ idea },170000);
-    current=r.drawing; st=r.status;
+    const g=await api("generate",{ idea });
+    st=g.status; renderCounter();
+    const r=await waitJob(g.jobId);
+    current=r.drawing; st=r.counter;
     setLoading(false); renderCounter(); renderResult(); $("#idea").value="";
   }catch(e){
     setLoading(false); current=null; go("create");
@@ -152,7 +168,8 @@ $("#editBtn").addEventListener("click", async ()=>{
   if(instruction.length<2){ msg($("#resMsg"),"Écris ce que tu veux changer.",true); return; }
   busy=true; setLoading(true,"Je retouche…");
   try{
-    const r=await api("edit",{ id:current.id, instruction },170000);
+    const g=await api("edit",{ id:current.id, instruction });
+    const r=await waitJob(g.jobId);
     current=r.drawing; $("#edit").value="";
     setLoading(false); renderResult();
   }catch(e){ setLoading(false); renderResult(); msg($("#resMsg"), e.message, true); }
