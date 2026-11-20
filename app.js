@@ -5,6 +5,7 @@ const $$ = s => [...document.querySelectorAll(s)];
 const CFG = window.ATELIER_CONFIG || {};
 const FN_URL = (CFG.supabaseUrl || "").replace(/\/$/, "") + "/functions/v1/atelier";
 
+let style = "bd";
 let st = { hasPin:false, limit:2, used:0, bonus:0, remaining:0, editMax:3 };
 let current = null, busy = false, parentPin = null;
 
@@ -83,6 +84,10 @@ function renderChips(){
   });
 }
 
+$$("#styles .chip").forEach(b=>b.addEventListener("click",()=>{
+  style=b.dataset.style; $$("#styles .chip").forEach(x=>x.classList.toggle("sel",x===b));
+}));
+
 /* ---------- SVG sanitize (affichage) ---------- */
 const ALLOWED=new Set(["svg","g","path","circle","ellipse","rect","polygon","polyline","line","defs","title"]);
 const BLACK=new Set(["#000","#000000","black"]);
@@ -150,7 +155,7 @@ $("#drawBtn").addEventListener("click", async ()=>{
   current={ id:null, idea, svg:null, edits:0 };
   show("v-result"); renderResult(); setLoading(true,"Je dessine…");
   try{
-    const g=await api("generate",{ idea });
+    const g=await api("generate",{ idea, style });
     st=g.status; renderCounter();
     const r=await waitJob(g.jobId);
     current=r.drawing; st=r.counter;
